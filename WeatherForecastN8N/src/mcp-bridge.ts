@@ -153,12 +153,28 @@ app.post("/call/:toolName", async (req: Request, res: Response) => {
   }
 });
 
+// Helper function to unwrap MCP response and extract clean data
+function unwrapMCPResponse(mcpResult: any): any {
+  // MCP responses come in format: { content: [{ type: "text", text: "..." }] }
+  if (mcpResult?.content?.[0]?.text) {
+    try {
+      // Parse the JSON string from the text field
+      return JSON.parse(mcpResult.content[0].text);
+    } catch {
+      // If parsing fails, return the text as-is
+      return mcpResult.content[0].text;
+    }
+  }
+  return mcpResult;
+}
+
 // Specific tool endpoints for easier n8n integration
 app.get("/tools/forecast", async (req: Request, res: Response) => {
   try {
     const days = parseInt(req.query.days as string) || 5;
     const result = await mcpClient.callTool("get_weather_forecast", { days });
-    res.json({ success: true, data: result });
+    const cleanData = unwrapMCPResponse(result);
+    res.json(cleanData);
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -168,7 +184,8 @@ app.get("/tools/current", async (req: Request, res: Response) => {
   try {
     const city = req.query.city as string;
     const result = await mcpClient.callTool("get_current_weather", { city });
-    res.json({ success: true, data: result });
+    const cleanData = unwrapMCPResponse(result);
+    res.json(cleanData);
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -182,7 +199,8 @@ app.get("/tools/city-forecast", async (req: Request, res: Response) => {
       city,
       days,
     });
-    res.json({ success: true, data: result });
+    const cleanData = unwrapMCPResponse(result);
+    res.json(cleanData);
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -192,7 +210,8 @@ app.get("/tools/alerts", async (req: Request, res: Response) => {
   try {
     const city = req.query.city as string;
     const result = await mcpClient.callTool("get_weather_alerts", { city });
-    res.json({ success: true, data: result });
+    const cleanData = unwrapMCPResponse(result);
+    res.json(cleanData);
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -202,7 +221,8 @@ app.get("/tools/statistics", async (req: Request, res: Response) => {
   try {
     const days = parseInt(req.query.days as string) || 7;
     const result = await mcpClient.callTool("get_weather_statistics", { days });
-    res.json({ success: true, data: result });
+    const cleanData = unwrapMCPResponse(result);
+    res.json(cleanData);
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
