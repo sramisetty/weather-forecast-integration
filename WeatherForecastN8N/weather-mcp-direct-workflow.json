@@ -45,150 +45,82 @@
     {
       "parameters": {
         "name": "get_weather_forecast",
-        "description": "Get weather forecast for a specified number of days (1-30). Returns temperature, humidity, wind, precipitation, and pressure data.",
-        "workflowId": "={{ $workflow.id }}",
-        "fields": {
-          "values": [
-            {
-              "name": "days",
-              "type": "number",
-              "description": "Number of days to forecast (default: 5)"
-            }
-          ]
-        }
+        "description": "Get weather forecast for a specified number of days (1-30). Returns temperature, humidity, wind, precipitation, and pressure data via MCP Bridge.",
+        "method": "GET",
+        "url": "=http://localhost:9000/tools/forecast?days={{ $fromAI('days', '', 5) }}",
+        "options": {}
       },
       "id": "tool-forecast",
       "name": "MCP: Weather Forecast",
-      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
       "position": [680, 100],
       "notesInFlow": true,
-      "notes": "Calls MCP Server"
+      "notes": "Calls MCP Bridge on port 9000"
     },
     {
       "parameters": {
         "name": "get_current_weather",
-        "description": "Get current weather conditions for a city. Returns current temperature, conditions, humidity, and wind.",
-        "workflowId": "={{ $workflow.id }}",
-        "fields": {
-          "values": [
-            {
-              "name": "city",
-              "type": "string",
-              "description": "City name (optional)"
-            }
-          ]
-        }
+        "description": "Get current weather conditions for a city. Returns current temperature, conditions, humidity, and wind via MCP Bridge.",
+        "method": "GET",
+        "url": "=http://localhost:9000/tools/current?city={{ $fromAI('city', '', '') }}",
+        "options": {}
       },
       "id": "tool-current",
       "name": "MCP: Current Weather",
-      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
       "position": [680, 200],
       "notesInFlow": true,
-      "notes": "Calls MCP Server"
+      "notes": "Calls MCP Bridge on port 9000"
     },
     {
       "parameters": {
         "name": "get_city_forecast",
-        "description": "Get weather forecast for a specific city. Requires city name.",
-        "workflowId": "={{ $workflow.id }}",
-        "fields": {
-          "values": [
-            {
-              "name": "city",
-              "type": "string",
-              "description": "City name (required)"
-            },
-            {
-              "name": "days",
-              "type": "number",
-              "description": "Number of days (default: 5)"
-            }
-          ]
-        }
+        "description": "Get weather forecast for a specific city. Requires city name via MCP Bridge.",
+        "method": "GET",
+        "url": "=http://localhost:9000/tools/city-forecast?city={{ $fromAI('city', '', 'London') }}&days={{ $fromAI('days', '', 5) }}",
+        "options": {}
       },
       "id": "tool-city",
       "name": "MCP: City Forecast",
-      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
       "position": [680, 300],
       "notesInFlow": true,
-      "notes": "Calls MCP Server"
+      "notes": "Calls MCP Bridge on port 9000"
     },
     {
       "parameters": {
         "name": "get_weather_alerts",
-        "description": "Get active weather alerts and warnings. Returns alert type, severity, and time periods.",
-        "workflowId": "={{ $workflow.id }}",
-        "fields": {
-          "values": [
-            {
-              "name": "city",
-              "type": "string",
-              "description": "City name (optional)"
-            }
-          ]
-        }
+        "description": "Get active weather alerts and warnings. Returns alert type, severity, and time periods via MCP Bridge.",
+        "method": "GET",
+        "url": "=http://localhost:9000/tools/alerts?city={{ $fromAI('city', '', '') }}",
+        "options": {}
       },
       "id": "tool-alerts",
       "name": "MCP: Weather Alerts",
-      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
       "position": [680, 400],
       "notesInFlow": true,
-      "notes": "Calls MCP Server"
+      "notes": "Calls MCP Bridge on port 9000"
     },
     {
       "parameters": {
         "name": "get_weather_statistics",
-        "description": "Get weather statistics over a period. Returns averages, extremes, and totals.",
-        "workflowId": "={{ $workflow.id }}",
-        "fields": {
-          "values": [
-            {
-              "name": "days",
-              "type": "number",
-              "description": "Number of days to analyze (default: 7)"
-            }
-          ]
-        }
+        "description": "Get weather statistics over a period. Returns averages, extremes, and totals via MCP Bridge.",
+        "method": "GET",
+        "url": "=http://localhost:9000/tools/statistics?days={{ $fromAI('days', '', 7) }}",
+        "options": {}
       },
       "id": "tool-stats",
       "name": "MCP: Weather Statistics",
-      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
       "position": [680, 500],
       "notesInFlow": true,
-      "notes": "Calls MCP Server"
-    },
-    {
-      "parameters": {
-        "authentication": "none",
-        "method": "POST",
-        "url": "http://localhost:9000/mcp",
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "method",
-              "value": "tools/call"
-            },
-            {
-              "name": "params",
-              "value": "={{ { name: $json.toolName, arguments: $json.arguments } }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "mcp-bridge",
-      "name": "MCP Bridge",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [900, 300],
-      "notesInFlow": true,
-      "notes": "Bridges n8n to MCP Server via HTTP"
+      "notes": "Calls MCP Bridge on port 9000"
     }
   ],
   "connections": {
