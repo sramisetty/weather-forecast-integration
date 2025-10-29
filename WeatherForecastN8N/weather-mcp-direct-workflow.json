@@ -51,7 +51,7 @@
         "options": {}
       },
       "id": "tool-forecast",
-      "name": "MCP: Weather Forecast",
+      "name": "MCP_Weather_Forecast",
       "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
       "position": [680, 100],
@@ -67,7 +67,7 @@
         "options": {}
       },
       "id": "tool-current",
-      "name": "MCP: Current Weather",
+      "name": "MCP_ Current Weather",
       "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
       "position": [680, 200],
@@ -83,7 +83,7 @@
         "options": {}
       },
       "id": "tool-city",
-      "name": "MCP: City Forecast",
+      "name": "MCP_ City Forecast",
       "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
       "position": [680, 300],
@@ -99,7 +99,7 @@
         "options": {}
       },
       "id": "tool-alerts",
-      "name": "MCP: Weather Alerts",
+      "name": "MCP_ Weather Alerts",
       "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
       "position": [680, 400],
@@ -115,7 +115,7 @@
         "options": {}
       },
       "id": "tool-stats",
-      "name": "MCP: Weather Statistics",
+      "name": "MCP_ Weather Statistics",
       "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
       "position": [680, 500],
@@ -146,7 +146,7 @@
         ]
       ]
     },
-    "MCP: Weather Forecast": {
+    "MCP_ Weather Forecast": {
       "ai_tool": [
         [
           {
@@ -157,7 +157,7 @@
         ]
       ]
     },
-    "MCP: Current Weather": {
+    "MCP_ Current Weather": {
       "ai_tool": [
         [
           {
@@ -168,7 +168,7 @@
         ]
       ]
     },
-    "MCP: City Forecast": {
+    "MCP_ City Forecast": {
       "ai_tool": [
         [
           {
@@ -179,7 +179,7 @@
         ]
       ]
     },
-    "MCP: Weather Alerts": {
+    "MCP_ Weather Alerts": {
       "ai_tool": [
         [
           {
@@ -190,7 +190,7 @@
         ]
       ]
     },
-    "MCP: Weather Statistics": {
+    "MCP_ Weather Statistics": {
       "ai_tool": [
         [
           {
