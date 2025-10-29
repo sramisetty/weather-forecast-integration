@@ -2,6 +2,12 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import { spawn } from "child_process";
 import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Configuration
 const PORT = process.env.MCP_BRIDGE_PORT || 9000;
