@@ -112,6 +112,23 @@ mcp-poc/
 
 ## 🚀 Quick Start
 
+### ⚡ Easy Way (Recommended)
+
+**One-Click Startup** - Use the provided batch scripts:
+
+```bash
+# Start all services (Weather API + MCP Bridge)
+start-all-services.bat
+
+# Check service status
+check-services.bat
+
+# Stop all services when done
+stop-all-services.bat
+```
+
+See `SCRIPTS_README.md` for detailed script documentation.
+
 ### Prerequisites
 
 - Python 3.8+
