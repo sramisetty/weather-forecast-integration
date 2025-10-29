@@ -1,13 +1,13 @@
 {
   "name": "weather-forecast-n8n-integration",
   "version": "1.0.0",
-  "description": "HTTP wrapper for Weather Forecast MCP Server - n8n integration",
+  "description": "n8n workflows for Weather Forecast API with MCP Bridge support",
   "type": "module",
-  "main": "dist/http-wrapper.js",
+  "main": "dist/mcp-bridge.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/http-wrapper.js",
-    "dev": "tsc && node dist/http-wrapper.js",
+    "start": "node dist/mcp-bridge.js",
+    "dev": "tsc && node dist/mcp-bridge.js",
     "watch": "tsc --watch"
   },
   "keywords": [
