@@ -9,14 +9,15 @@ A complete end-to-end weather forecast system with three integration layers: Fas
 
 ## 🎯 Overview
 
-This project provides three ways to access weather forecast data:
+This project provides multiple ways to access weather forecast data:
 
 1. **Weather Forecast API** (FastAPI) - RESTful API with Swagger UI
 2. **MCP Server** (Model Context Protocol) - Integration with Claude Desktop
-3. **n8n AI Agent** - Workflow automation with AI tools
+3. **n8n AI Agent** - Workflow automation with AI tools (Direct API or MCP Bridge)
 
 ## 🏗️ Architecture
 
+### Option 1: Direct API (Default - Simplest)
 ```
 ┌──────────────────────────────────────────────────────────┐
 │              Client Applications                          │
@@ -24,17 +25,55 @@ This project provides three ways to access weather forecast data:
 │             │                  │                          │
 │  Claude     │   n8n AI Agent   │   Direct API            │
 │  Desktop    │   + Ollama       │   Consumers             │
-│             │                  │                          │
+│             │   (Direct)       │                          │
 └─────┬───────┴────────┬─────────┴────────┬───────────────┘
       │                │                   │
-      │ MCP            │ HTTP              │ HTTP
+      │ MCP stdio      │ HTTP              │ HTTP
+      │                │                   │
+┌─────▼──────┐        │                   │
+│            │        │                   │
+│ MCP Server │        │                   │
+│ (Node.js)  │        │                   │
+│            │        │                   │
+└─────┬──────┘        │                   │
+      │                │                   │
+      └────────────────┴───────────────────┘
+                       │
+              ┌────────▼────────┐
+              │                 │
+              │  Weather API    │
+              │   (FastAPI)     │
+              │   Port: 3000    │
+              │                 │
+              └─────────────────┘
+```
+
+### Option 2: MCP Bridge (Optional - Unified Tools)
+```
+┌──────────────────────────────────────────────────────────┐
+│              Client Applications                          │
+├─────────────┬──────────────────┬─────────────────────────┤
+│             │                  │                          │
+│  Claude     │  n8n AI Agent    │   Direct API            │
+│  Desktop    │  + Ollama        │   Consumers             │
+│             │  (MCP Bridge)    │                          │
+└─────┬───────┴────────┬─────────┴────────┬───────────────┘
+      │                │                   │
+      │ MCP stdio      │ HTTP              │ HTTP
       │                │                   │
 ┌─────▼──────┐  ┌─────▼────────┐         │
 │            │  │                │         │
-│ MCP Server │  │  HTTP Wrapper  │         │
+│ MCP Server │  │  MCP Bridge    │         │
 │ (Node.js)  │  │  (Express.js)  │         │
-│            │  │  Port: 5000    │         │
+│            │  │  Port: 9000    │         │
 └─────┬──────┘  └─────┬──────────┘         │
+      │                │ MCP stdio          │
+      │         ┌──────▼──────┐            │
+      │         │             │            │
+      │         │ MCP Server  │            │
+      │         │ (Node.js)   │            │
+      │         │             │            │
+      │         └──────┬──────┘            │
       │                │                   │
       └────────────────┴───────────────────┘
                        │
@@ -63,9 +102,11 @@ mcp-poc/
 │   └── package.json
 │
 └── WeatherForecastN8N/          # n8n Integration
-    ├── src/http-wrapper.ts     # HTTP wrapper
-    ├── dist/http-wrapper.js    # Compiled
-    ├── weather-ai-agent-chat-workflow.json  # n8n workflow
+    ├── src/mcp-bridge.ts       # MCP Bridge (optional)
+    ├── dist/mcp-bridge.js      # Compiled
+    ├── weather-ai-agent-chat-workflow.json      # Direct API workflow (default)
+    ├── weather-mcp-direct-workflow.json         # MCP Bridge workflow
+    ├── MCP_INTEGRATION.md      # Integration guide
     └── package.json
 ```
 
@@ -102,6 +143,21 @@ npm run build
 
 ### 3. n8n Integration
 
+#### Option A: Direct API (Default - Recommended)
+
+Just start the Weather API and import the workflow:
+
+```bash
+# Weather API must be running on port 3000
+# Import: weather-ai-agent-chat-workflow.json
+```
+
+**No additional services needed!**
+
+#### Option B: MCP Bridge (Optional)
+
+For unified tools with Claude Desktop:
+
 ```bash
 cd WeatherForecastN8N
 npm install
@@ -109,8 +165,10 @@ npm run build
 npm start
 ```
 
-**HTTP Wrapper**: http://localhost:5000
-**Import workflow**: `weather-ai-agent-chat-workflow.json`
+**MCP Bridge**: http://localhost:9000
+**Import workflow**: `weather-mcp-direct-workflow.json`
+
+**See**: `WeatherForecastN8N/MCP_INTEGRATION.md` for details
 
 ## 🎨 Features
 
@@ -133,12 +191,13 @@ npm start
 
 ### n8n AI Agent
 
-- ✅ HTTP wrapper service (Express.js)
-- ✅ Pre-configured n8n workflow
+- ✅ Two integration options (Direct API & MCP Bridge)
+- ✅ Pre-configured n8n workflows
 - ✅ Ollama Llama 3.2 integration
 - ✅ 6 weather tools
 - ✅ Chat interface ready
 - ✅ No OpenAI API key required
+- ✅ MCP Bridge for cross-platform consistency (optional)
 
 ## 📊 API Endpoints
 
@@ -178,7 +237,7 @@ Each component has detailed documentation:
 
 - **Weather API**: `WeatherForecastFastAPI/README.md`
 - **MCP Server**: `WeatherForecastMCP/README.md` + `SETUP.md`
-- **n8n Integration**: `WeatherForecastN8N/README.md` + `SETUP.md` + `OLLAMA_SETUP.md` + `TROUBLESHOOTING.md`
+- **n8n Integration**: `WeatherForecastN8N/README.md` + `MCP_INTEGRATION.md` + `SETUP.md` + `OLLAMA_SETUP.md` + `TROUBLESHOOTING.md`
 
 ## 🎯 Use Cases
 
@@ -203,7 +262,15 @@ Use weather tools directly in Claude Desktop conversations through MCP.
 
 Create automated weather workflows with AI-powered tool selection.
 
-**Setup**: Import `weather-ai-agent-chat-workflow.json` into n8n
+**Default Setup** (Direct API):
+- Import `weather-ai-agent-chat-workflow.json` into n8n
+- Ensure Weather API is running on port 3000
+- No additional services required
+
+**Advanced Setup** (MCP Bridge):
+- Import `weather-mcp-direct-workflow.json` into n8n
+- Start MCP Bridge: `npm start` in WeatherForecastN8N
+- Provides unified tools with Claude Desktop
 
 ### 3. Direct API Access
 
@@ -219,11 +286,13 @@ curl "http://127.0.0.1:3000/api/forecast?days=5"
 ### Test Weather API
 ```bash
 curl http://127.0.0.1:3000/api/forecast/health
+curl "http://127.0.0.1:3000/api/forecast?days=3"
 ```
 
-### Test HTTP Wrapper
+### Test MCP Bridge (Optional)
 ```bash
-curl http://localhost:5000/tools
+curl http://localhost:9000/health
+curl "http://localhost:9000/tools/forecast?days=3"
 ```
 
 ### Test MCP Server
@@ -244,23 +313,24 @@ node test-mcp.js
 export WEATHER_API_URL=http://127.0.0.1:3000
 ```
 
-**HTTP Wrapper**:
+**MCP Bridge** (optional):
 ```bash
-export PORT=5000
-export WEATHER_API_URL=http://127.0.0.1:3000
+export MCP_BRIDGE_PORT=9000
 ```
 
 ## 🐛 Troubleshooting
 
 See detailed troubleshooting guides:
 - `WeatherForecastN8N/TROUBLESHOOTING.md`
+- `WeatherForecastN8N/MCP_INTEGRATION.md`
 - `WeatherForecastMCP/SETUP.md`
 
 ### Common Issues
 
 **Port conflicts**: Change ports in configuration
 **Ollama not found**: Install from https://ollama.com
-**n8n schema errors**: Use updated workflow file
+**n8n schema errors**: Use updated workflow files (weather-ai-agent-chat-workflow.json)
+**MCP Bridge not needed**: Use direct API workflow for simpler setup
 
 ## 🤝 Contributing
 
