@@ -1,0 +1,32 @@
+{
+  "name": "weather-forecast-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP Server for Weather Forecast API",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "weather-forecast-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js",
+    "watch": "tsc --watch"
+  },
+  "keywords": [
+    "mcp",
+    "weather",
+    "forecast",
+    "api"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "axios": "^1.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.0",
+    "typescript": "^5.5.4"
+  }
+}

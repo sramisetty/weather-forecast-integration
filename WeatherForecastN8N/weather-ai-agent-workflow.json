@@ -1,0 +1,295 @@
+{
+  "name": "Weather Forecast AI Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start-node",
+      "name": "When chat message received",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.chatInput }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a helpful weather assistant. Use the available weather tools to provide accurate and detailed weather information to users."
+        }
+      },
+      "id": "ai-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [460, 300],
+      "notesInFlow": true,
+      "notes": "AI Agent with Weather Forecast tools"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "options": {}
+      },
+      "id": "openai-model",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [460, 480],
+      "notesInFlow": true,
+      "notes": "Configure with your OpenAI API key"
+    },
+    {
+      "parameters": {
+        "name": "get_weather_forecast",
+        "description": "Get weather forecast for a specified number of days (1-30). Returns temperature, humidity, wind speed, precipitation, and atmospheric pressure.",
+        "method": "GET",
+        "url": "http://localhost:5000/tools/forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "days",
+              "value": "={{ $json.days || 5 }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "tool-forecast",
+      "name": "Weather Forecast Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [680, 100],
+      "notesInFlow": true,
+      "notes": "Get multi-day forecast"
+    },
+    {
+      "parameters": {
+        "name": "get_current_weather",
+        "description": "Get current weather conditions for a specific city or default location. Returns temperature, humidity, wind, and more.",
+        "method": "GET",
+        "url": "http://localhost:5000/tools/current",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "city",
+              "value": "={{ $json.city }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "tool-current",
+      "name": "Current Weather Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [680, 200],
+      "notesInFlow": true,
+      "notes": "Get current weather"
+    },
+    {
+      "parameters": {
+        "name": "get_city_forecast",
+        "description": "Get weather forecast for a specific city. Requires city name parameter. Returns multi-day forecast for the specified city.",
+        "method": "GET",
+        "url": "http://localhost:5000/tools/city-forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "city",
+              "value": "={{ $json.city }}"
+            },
+            {
+              "name": "days",
+              "value": "={{ $json.days || 5 }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "tool-city",
+      "name": "City Forecast Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [680, 300],
+      "notesInFlow": true,
+      "notes": "Get forecast by city"
+    },
+    {
+      "parameters": {
+        "name": "get_weather_alerts",
+        "description": "Get active weather alerts for a specific area. Returns alert type, severity level, description, and time periods.",
+        "method": "GET",
+        "url": "http://localhost:5000/tools/alerts",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "city",
+              "value": "={{ $json.city }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "tool-alerts",
+      "name": "Weather Alerts Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [680, 400],
+      "notesInFlow": true,
+      "notes": "Get weather alerts"
+    },
+    {
+      "parameters": {
+        "name": "get_weather_statistics",
+        "description": "Get weather statistics for a specified period (1-365 days). Returns average, max, and min temperatures, average humidity, total precipitation, and average wind speed.",
+        "method": "GET",
+        "url": "http://localhost:5000/tools/statistics",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "days",
+              "value": "={{ $json.days || 7 }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "tool-stats",
+      "name": "Weather Statistics Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [680, 500],
+      "notesInFlow": true,
+      "notes": "Get weather statistics"
+    },
+    {
+      "parameters": {
+        "name": "get_detailed_forecasts",
+        "description": "Get detailed weather forecasts for multiple days. Includes cloud cover, UV index, visibility, and potential weather alerts.",
+        "method": "GET",
+        "url": "http://localhost:5000/tools/detailed-multi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "days",
+              "value": "={{ $json.days || 5 }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "tool-detailed",
+      "name": "Detailed Forecast Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [680, 600],
+      "notesInFlow": true,
+      "notes": "Get detailed forecasts"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weather Forecast Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Current Weather Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "City Forecast Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weather Alerts Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weather Statistics Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detailed Forecast Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-29T00:00:00.000Z",
+  "versionId": "1"
+}

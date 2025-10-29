@@ -1,0 +1,241 @@
+{
+  "name": "Weather Forecast AI Chat",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "chat-trigger",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "weather-chat"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful weather assistant with access to real-time weather data. When users ask about weather, use the available tools to provide accurate, detailed information. Always include temperatures in both Celsius and Fahrenheit. Be concise but informative."
+        }
+      },
+      "id": "ai-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [460, 300],
+      "notesInFlow": true,
+      "notes": "AI Agent orchestrates weather tools based on user queries"
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:latest",
+        "options": {
+          "temperature": 0.7,
+          "baseUrl": "http://localhost:11434"
+        }
+      },
+      "id": "ollama-model",
+      "name": "Ollama Llama 3.2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [460, 480],
+      "notesInFlow": true,
+      "notes": "Ollama Llama 3.2 model - Ensure Ollama is running on localhost:11434"
+    },
+    {
+      "parameters": {
+        "name": "get_weather_forecast",
+        "description": "Get weather forecast for a specified number of days (1-30). Returns temperature in Celsius and Fahrenheit, weather summary, humidity percentage, wind speed in km/h, wind direction, precipitation in mm, and atmospheric pressure in hPa. Use this when the user asks for a general forecast without specifying a city.",
+        "method": "GET",
+        "url": "=http://localhost:5000/tools/forecast?days={{ $fromAI('days', '', 5) }}",
+        "options": {}
+      },
+      "id": "tool-forecast",
+      "name": "Weather Forecast Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [680, 100],
+      "notesInFlow": true,
+      "notes": "Get multi-day weather forecast"
+    },
+    {
+      "parameters": {
+        "name": "get_current_weather",
+        "description": "Get current weather conditions right now for a specific city or default location. Returns current temperature, weather conditions, humidity, wind speed and direction. Use this when user asks 'what is the weather now' or 'current weather'.",
+        "method": "GET",
+        "url": "=http://localhost:5000/tools/current?city={{ $fromAI('city', '', '') }}",
+        "options": {}
+      },
+      "id": "tool-current",
+      "name": "Current Weather Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [680, 200],
+      "notesInFlow": true,
+      "notes": "Get current weather conditions"
+    },
+    {
+      "parameters": {
+        "name": "get_city_forecast",
+        "description": "Get weather forecast for a specific city by name. Requires the city name as a parameter. Returns multi-day forecast with temperature, humidity, wind, and precipitation for that city. Use this when the user asks for weather in a specific city like 'weather in London' or 'forecast for Tokyo'.",
+        "method": "GET",
+        "url": "=http://localhost:5000/tools/city-forecast?city={{ $fromAI('city', '', 'London') }}&days={{ $fromAI('days', '', 5) }}",
+        "options": {}
+      },
+      "id": "tool-city",
+      "name": "City Forecast Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [680, 300],
+      "notesInFlow": true,
+      "notes": "Get forecast for specific city"
+    },
+    {
+      "parameters": {
+        "name": "get_weather_alerts",
+        "description": "Get active weather alerts and warnings for a specific area. Returns alert type (thunderstorm, heavy rain, snow, heat wave, etc.), severity level (low, moderate, high, severe), detailed description, and valid time period. Use this when user asks about weather warnings, alerts, or dangerous conditions.",
+        "method": "GET",
+        "url": "=http://localhost:5000/tools/alerts?city={{ $fromAI('city', '', '') }}",
+        "options": {}
+      },
+      "id": "tool-alerts",
+      "name": "Weather Alerts Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [680, 400],
+      "notesInFlow": true,
+      "notes": "Get weather alerts and warnings"
+    },
+    {
+      "parameters": {
+        "name": "get_weather_statistics",
+        "description": "Get weather statistics and analytics for a specified period (1-365 days). Returns average temperature, maximum and minimum temperatures, average humidity, total precipitation, and average wind speed. Use this when user asks for weather trends, averages, or statistics over time.",
+        "method": "GET",
+        "url": "=http://localhost:5000/tools/statistics?days={{ $fromAI('days', '', 7) }}",
+        "options": {}
+      },
+      "id": "tool-stats",
+      "name": "Weather Statistics Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [680, 500],
+      "notesInFlow": true,
+      "notes": "Get weather statistics over time"
+    },
+    {
+      "parameters": {
+        "name": "get_detailed_forecasts",
+        "description": "Get detailed comprehensive weather forecasts for multiple days. Includes all standard weather data PLUS cloud cover percentage, UV index (0-11), visibility in km, and any active weather alerts. Use this when user wants very detailed or complete weather information.",
+        "method": "GET",
+        "url": "=http://localhost:5000/tools/detailed-multi?days={{ $fromAI('days', '', 5) }}",
+        "options": {}
+      },
+      "id": "tool-detailed",
+      "name": "Detailed Forecast Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [680, 600],
+      "notesInFlow": true,
+      "notes": "Get detailed comprehensive forecasts"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Llama 3.2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weather Forecast Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Current Weather Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "City Forecast Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weather Alerts Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weather Statistics Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detailed Forecast Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-29T00:00:00.000Z",
+  "versionId": "1"
+}
